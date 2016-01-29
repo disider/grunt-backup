@@ -1,12 +1,15 @@
 module.exports = function (grunt) {
 
     var sourceDir = grunt.option('source') || '/var/www/vhosts/';
+    sourceDir = sourceDir.replace(/\/?$/, '/');
     var backupDir = grunt.option('backup') || '/var/backup/';
+    backupDir = backupDir.replace(/\/?$/, '/');
+
     var today = grunt.template.today('yyyymmdd');
 
     grunt.initConfig({
         prompt: {
-            target: {
+            ask_domain: {
                 options: {
                     questions: [
                         {
@@ -20,6 +23,18 @@ module.exports = function (grunt) {
                                 return true;
                             }
                         },
+                        {
+                            config: 'domain.base_path',
+                            type: 'input',
+                            default: 'httpdocs',
+                            message: 'Domain base path?'
+                        }
+                    ]
+                }
+            },
+            ask_database: {
+                options: {
+                    questions: [
                         {
                             config: 'database.name',
                             type: 'input',
@@ -85,16 +100,11 @@ module.exports = function (grunt) {
                         dot: true,
                         expand: true,
                         src: ['**/*'],
-                        cwd: sourceDir + '<%= domain.name %>'
+                        cwd: '../../../../' + sourceDir + '<%= domain.name %>'
                     }
                 ]
             }
         }
-    });
-
-    grunt.template.process('<%= backupDir %>/db-<%= date %>.sql', {
-        backupDir: backupDir + grunt.config('domain.name'),
-        date: grunt.template.today('yyyymmdd')
     });
 
     grunt.loadNpmTasks('grunt-prompt');
@@ -102,6 +112,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-mysql-dump');
     grunt.loadNpmTasks('grunt-mkdir');
 
-    grunt.registerTask('backup', ['prompt', 'mkdir', 'db_dump', 'compress']);
+    grunt.registerTask('backup:database', ['prompt:ask_database', 'mkdir', 'db_dump']);
+    grunt.registerTask('backup:files', ['prompt:ask_domain', 'mkdir', 'compress']);
+    grunt.registerTask('backup', ['backup:files', 'backup:database']);
+    grunt.registerTask('default', ['backup']);
 
 };
