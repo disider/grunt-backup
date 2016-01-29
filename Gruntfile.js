@@ -22,11 +22,36 @@ module.exports = function (grunt) {
                                 }
                                 return true;
                             }
-                        },
+                        }
+                    ]
+                }
+            },
+            ask_path: {
+                options: {
+                    questions: [
                         {
                             config: 'domain.path',
                             type: 'input',
-                            default: sourceDir + '<%= domain.name %>/httpdocs',
+                            default: function() {
+                                var domain = grunt.config('domain.name');
+                                var subdomain = '';
+
+                                var parts = domain.split('.');
+                                while(parts.length > 2) {
+                                    subdomain = parts.shift('.');
+                                    if(parts.length > 2) {
+                                        subdomain += '.';
+                                    }
+                                }
+
+                                domain = parts.join('.');
+
+                                if(subdomain) {
+                                    return sourceDir + domain + '/' + 'subdomains/' + subdomain + '/httpdocs';
+                                }
+
+                                return sourceDir + domain + '/httpdocs';
+                            },
                             message: 'Domain base path?'
                         }
                     ]
@@ -113,7 +138,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-mkdir');
 
     grunt.registerTask('backup:database', ['prompt:ask_database', 'mkdir', 'db_dump']);
-    grunt.registerTask('backup:files', ['prompt:ask_domain', 'mkdir', 'compress']);
+    grunt.registerTask('backup:files', ['prompt:ask_domain', 'prompt:ask_path', 'mkdir', 'compress']);
     grunt.registerTask('backup', ['backup:files', 'backup:database']);
     grunt.registerTask('default', ['backup']);
 
