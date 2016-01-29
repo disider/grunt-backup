@@ -24,9 +24,9 @@ module.exports = function (grunt) {
                             }
                         },
                         {
-                            config: 'domain.base_path',
+                            config: 'domain.path',
                             type: 'input',
-                            default: 'httpdocs',
+                            default: sourceDir + '<%= domain.name %>/httpdocs',
                             message: 'Domain base path?'
                         }
                     ]
@@ -100,7 +100,7 @@ module.exports = function (grunt) {
                         dot: true,
                         expand: true,
                         src: ['**/*'],
-                        cwd: '../../../../' + sourceDir + '<%= domain.name %>/<%= domain.base_path %>'
+                        cwd: '../../../../' + '<%= domain.path %>'
                     }
                 ]
             }
