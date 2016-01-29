@@ -100,7 +100,7 @@ module.exports = function (grunt) {
                         dot: true,
                         expand: true,
                         src: ['**/*'],
-                        cwd: '../../../../' + sourceDir + '<%= domain.name %>'
+                        cwd: '../../../../' + sourceDir + '<%= domain.name %>/<%= domain.base_path %>'
                     }
                 ]
             }
