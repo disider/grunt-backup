@@ -1,8 +1,13 @@
 module.exports = function (grunt) {
 
-    var sourceDir = grunt.option('source') || '/var/www/vhosts/';
+    var domainName = grunt.option('domainName');
+    var domainPath = grunt.option('domainPath');
+    var databaseName = grunt.option('databaseName') || 'root';
+    var databaseHost = grunt.option('databaseHost') || 'localhost';
+    var databaseUsername = grunt.option('databaseUsername');
+    var sourceDir = grunt.option('sourceDir') || '/var/www/vhosts/';
     sourceDir = sourceDir.replace(/\/?$/, '/');
-    var backupDir = grunt.option('backup') || '/var/backup/';
+    var backupDir = grunt.option('backupDir') || '/var/backup/';
     backupDir = backupDir.replace(/\/?$/, '/');
 
     var today = grunt.template.today('yyyymmdd');
@@ -16,6 +21,9 @@ module.exports = function (grunt) {
                             config: 'domain.name',
                             type: 'input',
                             message: 'Domain name?',
+                            default: function() {
+                                return domainName;
+                            },
                             validate: function (value) {
                                 if (value == '') {
                                     return 'Should not be blank';
@@ -33,6 +41,10 @@ module.exports = function (grunt) {
                             config: 'domain.path',
                             type: 'input',
                             default: function() {
+                                if(domainPath) {
+                                    return domainPath;
+                                }
+
                                 var domain = grunt.config('domain.name');
                                 var subdomain = '';
 
@@ -64,6 +76,7 @@ module.exports = function (grunt) {
                             config: 'database.name',
                             type: 'input',
                             message: 'Database name?',
+                            default: databaseName,
                             validate: function (value) {
                                 if (value == '') {
                                     return 'Should not be blank';
@@ -75,7 +88,7 @@ module.exports = function (grunt) {
                             config: 'database.username',
                             type: 'input',
                             message: 'Database username?',
-                            default: 'root'
+                            default: databaseUsername
                         },
                         {
                             config: 'database.password',
@@ -86,8 +99,8 @@ module.exports = function (grunt) {
                         {
                             config: 'database.hostname',
                             type: 'input',
-                            default: 'localhost',
-                            message: 'Database host?'
+                            message: 'Database host?',
+                            default: databaseHost
                         }
                     ]
                 }
@@ -137,7 +150,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-mysql-dump');
     grunt.loadNpmTasks('grunt-mkdir');
 
-    grunt.registerTask('backup:database', ['prompt:ask_database', 'mkdir', 'db_dump']);
+    grunt.registerTask('backup:database', ['prompt:ask_domain', 'prompt:ask_database', 'mkdir', 'db_dump']);
     grunt.registerTask('backup:files', ['prompt:ask_domain', 'prompt:ask_path', 'mkdir', 'compress']);
     grunt.registerTask('backup', ['backup:files', 'backup:database']);
     grunt.registerTask('default', ['backup']);
